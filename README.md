@@ -19,12 +19,12 @@ commits. Point it at a copy of any world you care about.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/library.png" alt="Library: instances as cards with loader and last played"></td>
-    <td width="50%"><img src="docs/downloads.png" alt="Downloads: running tasks and history"></td>
+    <td width="50%"><img src="docs/modpacks.png" alt="Modpacks: a featured pack above a grid of popular ones"></td>
+    <td width="50%"><img src="docs/browse.png" alt="Browse: Modrinth search results with loader and version filters"></td>
   </tr>
   <tr>
-    <td>Library — one card per instance, each with its own mods and worlds.</td>
-    <td>Downloads — progress, speed, cancel and retry, history kept on disk.</td>
+    <td>Modpacks — one featured pack, then the popular grid, all from Modrinth.</td>
+    <td>Browse — search Modrinth with loader and version filters.</td>
   </tr>
 </table>
 
