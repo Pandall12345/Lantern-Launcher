@@ -1,0 +1,296 @@
+<UserControl x:Class="LanternLauncher.Pages.LibraryPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:LanternLauncher.Controls"
+             xmlns:local="clr-namespace:LanternLauncher.Common">
+
+    <UserControl.Resources>
+
+        <LinearGradientBrush x:Key="ShelfField" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#ECF1F5" Offset="0" />
+            <GradientStop Color="#DFE5EC" Offset="1" />
+        </LinearGradientBrush>
+
+        <!-- Segment button: transparent, the white slider below carries the selected state -->
+        <Style x:Key="SegmentButton" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
+            <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Card shell -->
+        <Style x:Key="ShelfCard" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="8"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource CardLineBrush}" BorderThickness="1">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="lift" Y="0" />
+                            </Border.RenderTransform>
+                            <Grid local:RoundedClip.Radius="7">
+                                <ContentPresenter />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="lift" Storyboard.TargetProperty="Y"
+                                                             To="-2" Duration="0:0:0.14">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="lift" Storyboard.TargetProperty="Y"
+                                                             To="0" Duration="0:0:0.14">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <!-- Most recent: one full-width row. Small tile with the short version on the left, name, spec and Play on the right -->
+        <!-- Grid card -->
+        <!-- Loader mark on the cover: one geometry per loader, same 16x16 grid as the nav icons. -->
+        <Style x:Key="LoaderMark" TargetType="Path">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="Stretch" Value="None" />
+            <Setter Property="StrokeThickness" Value="1.4" />
+            <Setter Property="StrokeStartLineCap" Value="Round" />
+            <Setter Property="StrokeEndLineCap" Value="Round" />
+            <Setter Property="StrokeLineJoin" Value="Round" />
+            <Setter Property="Stroke" Value="{StaticResource AshBrush}" />
+            <Setter Property="Data" Value="{StaticResource IconBox}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Loader}" Value="Forge">
+                    <Setter Property="Data" Value="{StaticResource IconAnvil}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Loader}" Value="NeoForge">
+                    <Setter Property="Data" Value="{StaticResource IconAnvilSpark}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Loader}" Value="Fabric">
+                    <Setter Property="Data" Value="{StaticResource IconSpool}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Loader}" Value="Quilt">
+                    <Setter Property="Data" Value="{StaticResource IconQuilt}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Portrait card, 244x325 (3:4). Cover on top, name and loader underneath. -->
+        <DataTemplate x:Key="InstanceCard">
+            <Button Style="{StaticResource ShelfCard}" Width="210" Height="280" Margin="0,0,16,16"
+                    Command="{Binding DataContext.OpenInstanceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{Binding}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="{StaticResource ShelfField}">
+                        <Grid Margin="14">
+                            <Path Style="{StaticResource LoaderMark}"
+                                  HorizontalAlignment="Right" VerticalAlignment="Top" />
+
+                            <TextBlock Text="{Binding Monogram}" FontSize="36" FontWeight="SemiBold"
+                                       Foreground="{StaticResource StoneBrush}"
+                                       HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+                            <TextBlock Text="{Binding BandVersion}" FontFamily="{StaticResource FontMono}"
+                                       FontSize="11" Foreground="{StaticResource MuteBrush}"
+                                       HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" Padding="14,11,14,13"
+                            BorderBrush="{StaticResource CardLineBrush}" BorderThickness="0,1,0,0">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}" FontSize="13"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{StaticResource InkBrush}" />
+                            <TextBlock Text="{Binding LoaderAndSpec}" Margin="0,3,0,0"
+                                       FontFamily="{StaticResource FontMono}" FontSize="11"
+                                       Foreground="{StaticResource MuteBrush}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Typography.NumeralAlignment="Tabular" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Button>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ScrollViewer Style="{StaticResource ScrollViewerClean}"
+                  Padding="{StaticResource PagePadding}"
+                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel HorizontalAlignment="Stretch" MaxWidth="{StaticResource ContentMaxWidth}">
+
+            <!-- Header: title, sort, open folder -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Library" Style="{StaticResource TextH1}"
+                           VerticalAlignment="Center" />
+
+                <ComboBox Grid.Column="1" Style="{StaticResource ComboBoxDark}" Width="140"
+                          VerticalAlignment="Center" Margin="0,0,8,0"
+                          ItemsSource="{Binding Sorts}" SelectedItem="{Binding Sort, Mode=TwoWay}" />
+
+                <Button Grid.Column="2" Style="{StaticResource ButtonSecondary}" Content="Open folder"
+                        VerticalAlignment="Center" Command="{Binding OpenFolderCommand}" />
+            </Grid>
+
+            <!-- Library switch: a real segmented control, a sunken track with a white slider for the selection -->
+            <Grid Margin="0,18,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="{StaticResource SurfaceElevatedBrush}" CornerRadius="8"
+                    Padding="3" HorizontalAlignment="Left">
+                <Grid x:Name="Switcher">
+                    <Border x:Name="SegPill" Background="{StaticResource SurfaceBrush}"
+                            BorderBrush="{StaticResource CardLineBrush}" BorderThickness="1"
+                            CornerRadius="6" HorizontalAlignment="Left" Width="100"
+                            IsHitTestVisible="False">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="SegShift" X="0" />
+                        </Border.RenderTransform>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="SegLantern" Style="{StaticResource SegmentButton}"
+                                Command="{Binding SelectLibraryCommand}" CommandParameter="Lantern">
+                            <StackPanel x:Name="SegLanternText" Orientation="Horizontal">
+                                <TextBlock Text="Lantern" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding LanternCountText}" Margin="6,0,0,0" VerticalAlignment="Center"
+                                           Foreground="{StaticResource MuteBrush}"
+                                           Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button x:Name="SegMojang" Style="{StaticResource SegmentButton}"
+                                Command="{Binding SelectLibraryCommand}" CommandParameter="Mojang">
+                            <StackPanel x:Name="SegMojangText" Orientation="Horizontal">
+                                <TextBlock Text="Mojang" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding MojangCountText}" Margin="6,0,0,0" VerticalAlignment="Center"
+                                           Foreground="{StaticResource MuteBrush}"
+                                           Typography.NumeralAlignment="Tabular" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            </Grid>
+
+            <!-- Content area (fades and lifts when the library changes) -->
+            <StackPanel x:Name="ContentRoot" RenderTransformOrigin="0.5,0">
+            <StackPanel.RenderTransform>
+                <TranslateTransform x:Name="ContentShift" Y="0" />
+            </StackPanel.RenderTransform>
+
+            <!-- Skeleton -->
+            <StackPanel Margin="0,20,0,0" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                <controls:SkeletonTile Height="196" Radius="8" Margin="0,0,0,24" />
+                <UniformGrid Columns="3">
+                    <controls:SkeletonTile Height="104" Radius="8" Margin="0,0,12,0" />
+                    <controls:SkeletonTile Height="104" Radius="8" Margin="0,0,12,0" />
+                    <controls:SkeletonTile Height="104" Radius="8" Margin="0,0,0,0" />
+                </UniformGrid>
+            </StackPanel>
+
+            <!-- All instances: one list, most recent first. A separate "continue playing"
+                 row repeated the same card, so the library shows everything once. -->
+            <TextBlock Text="All instances" Margin="0,26,0,12" FontSize="15" FontWeight="SemiBold"
+                       FontFamily="{StaticResource UiFont}" Foreground="{StaticResource InkBrush}"
+                       Visibility="{Binding HasItems, Converter={StaticResource BoolToVis}}" />
+
+            <ItemsControl ItemsSource="{Binding Items}" ItemTemplate="{StaticResource InstanceCard}"
+                          Margin="0,0,-16,0">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <!-- Empty state: the library has nothing in it -->
+            <StackPanel Margin="0,48,0,0" MaxWidth="440" HorizontalAlignment="Left"
+                        Visibility="{Binding ShowEmpty, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="No instances yet" Style="{StaticResource TextH2}" />
+                <TextBlock Text="Install a modpack and it lands here, ready to launch."
+                           Style="{StaticResource TextBody}" Margin="0,8,0,0" TextWrapping="Wrap" />
+                <Button Style="{StaticResource ButtonPrimary}" Content="Browse modpacks" Margin="0,20,0,0"
+                        HorizontalAlignment="Left" Command="{Binding BrowseModpacksCommand}" />
+            </StackPanel>
+
+            <!-- Empty state: the official folder does not exist -->
+            <StackPanel Margin="0,48,0,0" MaxWidth="520" HorizontalAlignment="Left"
+                        Visibility="{Binding ShowMissing, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="Official .minecraft not found" Style="{StaticResource TextH2}" />
+                <TextBlock Text="{Binding PathText}" Margin="0,10,0,0" TextWrapping="Wrap"
+                           FontFamily="{StaticResource FontMono}" FontSize="12"
+                           Foreground="{StaticResource MuteBrush}" />
+                <TextBlock Margin="0,10,0,0" Style="{StaticResource TextBody}" TextWrapping="Wrap"
+                           Text="Start the game once with the official launcher and this folder appears." />
+                <Button Style="{StaticResource ButtonSecondary}" Content="Open folder" Margin="0,20,0,0"
+                        HorizontalAlignment="Left" Command="{Binding OpenFolderCommand}" />
+            </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

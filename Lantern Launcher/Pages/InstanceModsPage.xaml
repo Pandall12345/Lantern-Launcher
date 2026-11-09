@@ -1,0 +1,146 @@
+<UserControl x:Class="LanternLauncher.Pages.InstanceModsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+        <!-- Toggle: a small pill carrying the on/off state. Renaming the jar is the action;
+             the pill only reports it, so it stays quiet when off. -->
+        <Style x:Key="ModToggle" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="ToolTip" Value="{Binding StateHint}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Pill" CornerRadius="9" Padding="10,3"
+                                Background="{StaticResource SurfaceElevatedBrush}">
+                            <TextBlock x:Name="Label" Text="{Binding StateText}" FontSize="11"
+                                       FontFamily="{StaticResource FontMono}"
+                                       Foreground="{StaticResource MuteBrush}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Enabled}" Value="True">
+                                <Setter TargetName="Pill" Property="Background" Value="{StaticResource SuccessSoftBrush}" />
+                                <Setter TargetName="Label" Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                            </DataTrigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Pill" Property="Opacity" Value="0.78" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="ModRowTemplate">
+            <Border x:Name="Row" Background="Transparent" Padding="12,0,18,0">
+                <Grid Height="46">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="72" />
+                        <ColumnDefinition Width="56" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="14"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                               Foreground="{StaticResource InkBrush}" ToolTip="{Binding FilePath}" />
+
+                    <TextBlock Grid.Column="1" Text="{Binding Meta}" FontSize="11" VerticalAlignment="Center"
+                               FontFamily="{StaticResource FontMono}"
+                               Foreground="{StaticResource StoneBrush}"
+                               Margin="16,0,0,0" TextTrimming="CharacterEllipsis" MaxWidth="240" />
+
+                    <TextBlock Grid.Column="2" Text="{Binding SizeText}" FontSize="11" VerticalAlignment="Center"
+                               HorizontalAlignment="Right" Margin="0,0,18,0"
+                               FontFamily="{StaticResource FontMono}"
+                               Foreground="{StaticResource MuteBrush}"
+                               Typography.NumeralAlignment="Tabular" />
+
+                    <Button Grid.Column="3" Style="{StaticResource ModToggle}" HorizontalAlignment="Right"
+                            AutomationProperties.Name="{Binding StateHint}"
+                            AutomationProperties.AutomationId="ModToggle"
+                            Command="{Binding DataContext.ToggleCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding}" />
+                </Grid>
+            </Border>
+
+            <DataTemplate.Triggers>
+                <Trigger SourceName="Row" Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Row" Property="Background" Value="{StaticResource SurfaceElevatedBrush}" />
+                </Trigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="{StaticResource PagePadding}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Back to the instance this list belongs to -->
+            <Button Grid.Row="0" Style="{StaticResource ButtonLink}" HorizontalAlignment="Left"
+                    Command="{Binding BackCommand}" AutomationProperties.Name="Back to instance">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="{StaticResource IconChevronLeft}" Stroke="{StaticResource MuteBrush}"
+                          StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                          Width="11" Height="11" Stretch="Uniform" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Title}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+
+            <!-- Header: what this list is, how much of it is visible, search and sort -->
+            <Grid Grid.Row="1" Margin="0,20,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Mods" FontSize="26" Foreground="{StaticResource InkBrush}" />
+                    <TextBlock Text="{Binding SummaryText}" Margin="14,0,0,4" VerticalAlignment="Bottom"
+                               FontSize="12" Foreground="{StaticResource BodyTextBrush}" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                    <TextBox Style="{StaticResource SearchBox}" Width="220" Tag="Search mods"
+                             Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" />
+                    <ComboBox Style="{StaticResource ComboBoxDark}" Width="110" Margin="8,0,0,0"
+                              ItemsSource="{Binding Sorts}" SelectedItem="{Binding Sort, Mode=TwoWay}" />
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="2" Margin="0,16,0,0">
+                <Border Height="1" Background="{StaticResource HairlineBrush}" />
+                <TextBlock Text="{Binding CountText}" FontSize="11" Margin="0,12,0,0"
+                           HorizontalAlignment="Right"
+                           FontFamily="{StaticResource FontMono}"
+                           Foreground="{StaticResource StoneBrush}" />
+            </Grid>
+
+            <ScrollViewer Grid.Row="3" Margin="0,-2,0,0" Style="{StaticResource ScrollViewerClean}"
+                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding Visible}" ItemTemplate="{StaticResource ModRowTemplate}" />
+            </ScrollViewer>
+
+            <TextBlock Grid.Row="3" Text="This instance has no mods yet." FontSize="13"
+                       Foreground="{StaticResource MuteBrush}" Margin="12,8,0,0"
+                       Visibility="{Binding HasNoMods, Converter={StaticResource BoolToVis}}" />
+        </Grid>
+
+        <Border Grid.Row="1" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="0,1,0,0">
+            <Grid Margin="32,13,32,13">
+                <TextBlock Text="{Binding FolderText}" VerticalAlignment="Center"
+                           FontFamily="{StaticResource FontMono}" FontSize="11"
+                           Foreground="{StaticResource StoneBrush}"
+                           TextTrimming="CharacterEllipsis" />
+
+                <Button Style="{StaticResource ButtonSecondary}" Content="Open mods folder"
+                        HorizontalAlignment="Right" Command="{Binding OpenFolderCommand}" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

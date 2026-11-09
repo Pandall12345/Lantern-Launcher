@@ -1,0 +1,29 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      # The same command as the readme: a warning is a bug, so the build fails on one.
+      - name: Build
+        run: dotnet build "Lantern Launcher/Lantern Launcher.csproj" -c Release -p:RunAnalyzers=true -warnaserror
+
+      - name: Upload the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: LanternLauncher-win64
+          path: Lantern Launcher/bin/Release/net9.0-windows/
+          if-no-files-found: error

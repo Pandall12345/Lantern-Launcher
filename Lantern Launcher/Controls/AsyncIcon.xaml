@@ -1,0 +1,19 @@
+<UserControl x:Class="LanternLauncher.Controls.AsyncIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid x:Name="Host" Background="{StaticResource SkeletonFillBrush}" ClipToBounds="True">
+
+        <!-- Loading: a faint ink band sweeping across the paper. White light is invisible on this background. -->
+        <Border x:Name="Sweep" HorizontalAlignment="Left" Opacity="0" IsHitTestVisible="False">
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="SweepShift" X="-200" />
+            </Border.RenderTransform>
+        </Border>
+
+        <Image x:Name="ImageHost" Stretch="UniformToFill" Opacity="0" />
+
+        <Border x:Name="Edge" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="1"
+                Background="Transparent" IsHitTestVisible="False" />
+    </Grid>
+</UserControl>

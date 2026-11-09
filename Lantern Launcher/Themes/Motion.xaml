@@ -1,0 +1,39 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:common="clr-namespace:LanternLauncher.Common">
+
+    <!-- The only durations and curves in the app; a hard-coded literal elsewhere is a bug.
+         Each curve is a real cubic-bezier, solved inside CubicBezierEase. -->
+
+
+
+
+    <!-- Enter: quick start, slow finish -->
+    <common:CubicBezierEase x:Key="EaseEnter" EasingMode="EaseIn"
+                            X1="0.1" Y1="0.9" X2="0.2" Y2="1" />
+    <!-- Exit: slow start, quick finish -->
+    <common:CubicBezierEase x:Key="EaseExit" EasingMode="EaseIn"
+                            X1="0.7" Y1="0" X2="1" Y2="0.5" />
+    <!-- Movement inside a screen (nav indicator) -->
+    <common:CubicBezierEase x:Key="EaseMove" EasingMode="EaseIn"
+                            X1="0.55" Y1="0.55" X2="0" Y2="1" />
+    <!-- Page transition: eased at both ends, offset spread across the whole duration -->
+    <common:CubicBezierEase x:Key="EasePageSmooth" EasingMode="EaseIn"
+                            X1="0.25" Y1="0.1" X2="0.25" Y2="1" />
+
+    <!-- Generic and colour transitions -->
+
+    <!-- Keyboard focus ring: only while navigating with the keyboard -->
+    <Style x:Key="FocusRing" TargetType="Control">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border Margin="-3" CornerRadius="8"
+                            BorderBrush="{StaticResource AccentBrush}" BorderThickness="2" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

@@ -1,0 +1,31 @@
+<UserControl x:Class="LanternLauncher.Controls.ToastNotification"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="320" Margin="0,0,0,8"
+             Opacity="0">
+    <UserControl.RenderTransform>
+        <TranslateTransform x:Name="Shift" Y="-8" />
+    </UserControl.RenderTransform>
+
+    <Border Background="{StaticResource SurfaceBrush}"
+            BorderBrush="{StaticResource HairlineBrush}" BorderThickness="1"
+            CornerRadius="10" Padding="14,12">
+        <Border.Effect>
+            <DropShadowEffect Color="#5B6673" BlurRadius="18" ShadowDepth="4" Opacity="0.16" />
+        </Border.Effect>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Status dot rather than an accent bar -->
+            <Ellipse x:Name="Dot" Grid.Column="0" Width="6" Height="6"
+                     Fill="{StaticResource AccentBrush}" VerticalAlignment="Top"
+                     Margin="0,8,10,0" />
+
+            <TextBlock x:Name="MessageText" Grid.Column="1" Style="{StaticResource TextSmall}"
+                       Foreground="{StaticResource InkBrush}" TextWrapping="Wrap" />
+        </Grid>
+    </Border>
+</UserControl>
